@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inheritance Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ---------- RESET ---------- */
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+    body{display:flex;flex-direction:column;min-height:100vh;background:#f5f7fb;color:#333;}
+    main{flex:1;}
+
+    /* ---------- NAV ---------- */
+    header{background:#1a1a40;color:white;padding:15px 30px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000;}
+    .logo{font-size:20px;font-weight:bold;color:#ffcc00;}
+    nav ul{list-style:none;display:flex;gap:25px;}
+    nav ul li a{color:white;text-decoration:none;font-weight:500;transition:0.3s;padding:6px 10px;border-radius:5px;}
+    nav ul li a:hover{background:#ffcc00;color:#1a1a40;}
+    .hamburger{display:none;font-size:22px;cursor:pointer;}
+
+    @media(max-width:768px){
+      nav ul{display:none;flex-direction:column;background:#1a1a40;position:absolute;top:60px;right:0;width:200px;padding:15px;}
+      nav ul.show{display:flex;}
+      .hamburger{display:block;}
+    }
+
+    /* ---------- HOME ---------- */
+    .home{text-align:center;padding:80px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .home h1{font-size:2.5rem;margin-bottom:20px;color:#1a1a40;animation:fadeIn 2s ease-in-out;}
+    .home p{font-size:1.2rem;max-width:600px;line-height:1.6;margin-bottom:30px;color:#555;}
+    .clock{font-size:2rem;font-weight:bold;color:#ff6600;transition:transform 0.3s ease;}
+    .clock:hover{transform:scale(1.2);color:#1a1a40;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ---------- SECTIONS ---------- */
+    .content-section{display:none;padding:40px 20px;}
+    .card{background:white;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);max-width:100%;margin:auto;animation:fadeIn 1s ease;}
+    .card h2{margin-bottom:15px;color:#1a1a40;}
+
+    /* ---------- AGREEMENT ---------- */
+    #agreementText{white-space:pre-line;line-height:1.6;margin-bottom:15px;}
+    #seeMoreBtn{color:#ff6600;cursor:pointer;text-decoration:none;}
+    #seeMoreBtn:hover{text-decoration:underline;}
+    button{background:#1a1a40;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;transition:0.3s;}
+    button:hover{background:#ff6600;}
+
+    /* ---------- TRANSACTIONS ---------- */
+    table{width:100%;border-collapse:collapse;margin-top:20px;}
+    th,td{padding:12px;border-bottom:1px solid #ddd;text-align:left;}
+    th{background:#1a1a40;color:white;}
+    .total{font-weight:bold;color:#1a1a40;margin-top:15px;}
+
+    /* ---------- FOOTER ---------- */
+    footer{background:#1a1a40;color:white;text-align:center;padding:15px;margin-top:auto;}
+    footer a{color:#ffcc00;text-decoration:none;}
+    footer a:hover{text-decoration:underline;}
+  </style>
+</head>
+<body>
+  <!-- ---------- HEADER ---------- -->
+  <header>
+    <div class="logo"><i class="fa-solid fa-scale-balanced"></i> Inheritance Journal</div>
+    <nav>
+      <ul id="nav-links">
+        <li><a href="#" data-section="home">Home</a></li>
+        <li><a href="#" data-section="agreements">Agreements</a></li>
+        <li><a href="#" data-section="transactions">Transactions</a></li>
+        <li><a href="#" data-section="user">User Details</a></li>
+        <li><a href="#" data-section="logout">Logout</a></li>
+      </ul>
+      <div class="hamburger"><i class="fa fa-bars"></i></div>
+    </nav>
+  </header>
+
+  <!-- ---------- MAIN ---------- -->
+  <main>
+    <!-- HOME -->
+    <div id="home" class="home content-section" style="display:block;">
+      <h1>Welcome to Your Inheritance Dashboard</h1>
+      <p>Here you can view your legal agreements, track transactions, and manage your account details securely.</p>
+      <p>Our system ensures transparency, security, and easy access to all your important documents.</p>
+      <p>Stay updated with your finances, contracts, and records in one convenient place.</p>
+      <div class="clock" id="clock"></div>
+    </div>
+
+    <!-- AGREEMENTS -->
+    <div id="agreements" class="content-section">
+      <div class="card">
+        <h2>Agreement Letter</h2>
+        <p id="agreementText">AGREEMENT LETTER
+
+        This Agreement Letter (“Agreement”) is made and entered into 15th of February, 2015...</p>
+        <a href="#" id="seeMoreBtn">See More</a> | 
+        <button id="downloadAgreement">📄 Download PDF</button>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div id="transactions" class="content-section">
+      <h2>💰 Tax Debt Invoice</h2>
+      <div class="transactions-container">
+        <table>
+          <thead>
+            <tr><th>Year</th><th>Principal</th><th>Interest/Penalties</th><th>Total</th></tr>
+          </thead>
+          <tbody id="transactionsBody"></tbody>
+        </table>
+        <p id="totalAmount" class="grand-total"></p>
+      </div>
+      <div class="charts">
+        <canvas id="pieChart"></canvas>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <!-- USER DETAILS -->
+    <div id="user" class="content-section">
+      <div class="card">
+        <h2>User Details</h2>
+        <img src="{{ url_for('static', filename='images/profile.png')}}" alt="user image"style="width:80px;height:80px;border-radius:50%;"
+        <p><strong>Name:</strong> Kendra Davis</p>
+        <p><strong>Email:</strong> kendradavis19996@gmail.com</p>
+        <p><strong>Beneficiary of:</strong> $80,000 Inheritance</p>
+      </div>
+    </div>
+
+    <!-- LOGOUT -->
+    <div id="logout" class="content-section">
+      <div class="card">
+        <h2>Logout</h2>
+        <p>You have been logged out successfully.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ---------- FOOTER ---------- -->
+  <footer>
+    <p>&copy; 2025 Inheritance Dashboard <a href="#">Privacy Policy</a></p>
+  </footer>
+
+  <!-- ---------- SCRIPT ---------- -->
+  <script>
+    // NAVBAR TOGGLE
+    const hamburger=document.querySelector(".hamburger");
+    const navLinks=document.getElementById("nav-links");
+    hamburger.addEventListener("click",()=>navLinks.classList.toggle("show"));
+
+    // SECTION NAVIGATION (fixed to use data-section)
+    document.querySelectorAll('nav a[data-section]').forEach(link=>{
+      link.addEventListener('click',function(e){
+        e.preventDefault();
+        const target=this.getAttribute('data-section');
+        document.querySelectorAll('.content-section').forEach(sec=>sec.style.display='none');
+        document.getElementById(target).style.display='block';
+      });
+    });
+
+    // CLOCK
+    function updateClock(){
+      const deadline=new Date('2025-09-30T23:59:59Z');
+      const now=new Date();
+      const timeLeft=deadline-now;
+      if(timeLeft<=0){document.getElementById('clock').textContent='Timer ended!';return;}
+      const days=Math.floor(timeLeft/(1000*60*60*24));
+      const hours=Math.floor((timeLeft%(1000*60*60*24))/(1000*60*60));
+      const minutes=Math.floor((timeLeft%(1000*60*60))/(1000*60));
+      const seconds=Math.floor((timeLeft%(1000*60))/1000);
+      document.getElementById('clock').textContent=`${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    setInterval(updateClock,1000);updateClock();
+
+    // AGREEMENT LETTER
+    const fullAgreement=`AGREEMENT LETTER
+
+This Agreement Letter (“Agreement”) is made and entered into 15th of February, 2015, by and between:
+
+Mr. Kristin Davis, an individual residing within the United States of America, hereinafter referred to as “the Client,”
+
+AND
+
+Mr. Frank Alexander Williams, duly licensed Attorney-at-Law, hereinafter referred to as “the Counsel.”
+
+Both parties hereby acknowledge and affirm that they are of sound mind and legal capacity to enter into this Agreement and, intending to be legally bound, do hereby agree to the following terms and conditions:
+
+
+
+1. BACKGROUND AND CONTEXT
+
+1.1 In the course of his entrepreneurial endeavors, Mr. Kristin Davis engaged in and successfully operated a business venture under the name Truck Business and Co., which enterprise generated certain profits and accumulated funds during the period of operation.
+
+1.2 As of February 2015, the Client confirms the existence of the sum of Eighty Thousand U.S. Dollars ($80,000.00) arising from the aforementioned business venture, said funds having been preserved for distribution and lawful disposition.
+
+1.3 The Client has expressed his firm intention and solemn decision that the sum herein stated shall be transferred, bestowed, and delivered to his lawful daughter, Ms. Kendra Davis, subject to the satisfaction of all applicable requirements, including but not limited to taxes, levies, administrative charges, and incidental fees.
+
+1.4 In pursuit of this lawful intention, the Client has duly retained the services of the Counsel, Mr. Frank Alexander Williams, who shall serve as legal custodian, advisor, and executor of the process by which the funds are secured, protected, and eventually transferred in accordance with law.
+
+
+
+2. APPOINTMENT OF COUNSEL
+
+2.1 The Client hereby formally appoints the Counsel as his legal representative and advisor for the purposes of drafting, recording, and effectuating all legal documents, declarations, and filings necessary to safeguard the sum of $80,000.
+
+2.2 The Counsel shall further act in the capacity of executor and trustee in respect of said funds, with authority to hold, administer, and disburse the amount upon fulfillment of the provisions contained herein.
+
+
+
+3. WILL AND DECLARATION
+
+3.1 The Client has declared, and the Counsel has witnessed, that his unambiguous intention is to vest the sum of $80,000 exclusively in his daughter, Kendra Davis, as a matter of inheritance, gift, and rightful succession.
+
+3.2 This declaration is to be treated as an integral part of the Client’s estate planning and testamentary instructions, binding upon his estate, heirs, and assigns, and enforceable in law.
+
+3.3 The Counsel acknowledges receipt of this declaration and undertakes to incorporate it into the Client’s will and testament, ensuring its recognition under relevant probate and succession statutes.
+
+
+
+4. TAXES, FEES, AND OBLIGATIONS
+
+4.1 The parties mutually acknowledge that prior to the transfer of funds, there may be government-imposed taxes, probate fees, attorney’s charges, and administrative expenses arising from the holding or release of the said sum.
+
+4.2 The Counsel undertakes to identify, calculate, and notify the Client of all such obligations, and to ensure that payments are made in due course so that no encumbrance, lien, or lawful claim shall diminish or obstruct the inheritance of Ms. Kendra Davis.
+
+4.3 The Counsel shall withhold the funds in trust until such obligations are satisfied, after which the net sum, or its lawful equivalent, shall be transferred in entirety to the named beneficiary.
+
+
+
+5. DUTIES OF COUNSEL
+
+5.1 The Counsel shall exercise the highest duty of care, diligence, honesty, and loyalty in the handling of all matters pertaining to this Agreement.
+
+5.2 The Counsel shall ensure that the funds remain safeguarded, immune from misappropriation, and preserved in a secure financial or trust account pending disbursement.
+
+5.3 The Counsel shall provide periodic updates to the Client (and, where appropriate, to Ms.Kendra Davis) concerning the progress of all filings, the status of taxes and fees, and the projected timeline of distribution.
+
+
+
+
+6. RIGHTS OF BENEFICIARY
+
+6.1 Upon the completion of all administrative requirements, Ms. Kendra Davis shall be entitled to full possession, ownership, and control of the said funds without restriction.
+
+6.2 The Client’s intention is that the inheritance be regarded as her exclusive property, free from claims of third parties except as required by law.
+
+6.3 In the event of unforeseen delay or complication, the Counsel shall act in good faith to expedite the resolution of such matters, keeping the rights of Ms. Kendra Davis paramount.
+
+
+
+7. MISCELLANEOUS
+
+7.1 This Agreement shall be binding upon the Client, the Counsel, the estate of the Client, and the heirs, executors, and assigns thereof.
+
+7.2 Any amendments or modifications to this Agreement must be in writing, signed by both parties, and witnessed in accordance with legal standards.
+
+7.3 This Agreement shall be governed and construed under the laws of the state and country wherein it is executed.
+
+
+
+8. CONCLUSION
+
+Both parties, having read and understood the entirety of this Agreement, do hereby affix their signatures below, confirming their full acceptance of the terms and obligations contained herein.
+
+
+
+Signed 15th of February, 2015
+
+
+
+Mr. Kristin Davis (Client)
+
+⸻
+
+Mr. Frank Alexander Williams (Counsel)
+
+Witnessed by:
+Matthew Luther Chaf`;
+    document.getElementById("seeMoreBtn").addEventListener("click",e=>{
+      e.preventDefault();
+      document.getElementById("agreementText").innerText=fullAgreement;
+      e.target.style.display="none";
+    });
+    document.getElementById("downloadAgreement").addEventListener("click",()=>{
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF();
+      const split=doc.splitTextToSize(fullAgreement,180);
+      doc.text(split,15,20);
+      doc.save("Inheritance_Agreement.pdf");
+    });
+
+    // TRANSACTIONS
+    const taxData=[
+      {year:2015,principal:1000,interest:300,total:1300},
+      {year:2016,principal:1000,interest:275,total:1275},
+      {year:2017,principal:1000,interest:250,total:1250},
+      {year:2018,principal:1000,interest:225,total:1225},
+      {year:2019,principal:1000,interest:200,total:1200},
+      {year:2020,principal:1000,interest:175,total:1175},
+      {year:2021,principal:1000,interest:150,total:1150},
+      {year:2022,principal:1000,interest:125,total:1125},
+      {year:2023,principal:1000,interest:100,total:1100},
+      {year:2024,principal:1000,interest:100,total:1100},
+      {year:2025,principal:800,interest:100,total:900}
+    ];
+    const tbody=document.getElementById("transactionsBody");
+    let grandPrincipal=0,grandInterest=0,grandTotal=0;
+    taxData.forEach(item=>{
+      grandPrincipal+=item.principal;grandInterest+=item.interest;grandTotal+=item.total;
+      const row=`<tr><td>${item.year}</td><td>$${item.principal.toLocaleString()}</td><td>$${item.interest.toLocaleString()}</td><td>$${item.total.toLocaleString()}</td></tr>`;
+      tbody.insertAdjacentHTML("beforeend",row);
+    });
+    document.getElementById("totalAmount").textContent="Total Amount Due: $"+grandTotal.toLocaleString();
+
+    new Chart(document.getElementById("pieChart"),{
+      type:"pie",
+      data:{labels:["Total Principal","Total Interest/Penalties"],datasets:[{data:[grandPrincipal,grandInterest],backgroundColor:["#4caf50","#f44336"]}]},
+      options:{plugins:{legend:{position:"bottom"}}}
+    });
+    new Chart(document.getElementById("barChart"),{
+      type:"bar",
+      data:{labels:taxData.map(d=>d.year),datasets:[{label:"Yearly Total ($)",data:taxData.map(d=>d.total),backgroundColor:"#3498db"}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
+  </script>
+</body>
+</html>

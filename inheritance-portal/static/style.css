@@ -1,0 +1,66 @@
+/* Transactions Table Styling */
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.transactions-table thead {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  color: #fff;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.transactions-table tr:hover {
+  background: #f9f9f9;
+  transition: 0.3s ease;
+}
+
+.transactions-table tfoot td {
+  font-weight: bold;
+  background: #f1f1f1;
+  color: #333;
+}
+
+/* Chart Container */
+#transactionsChart {
+  margin-top: 30px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
